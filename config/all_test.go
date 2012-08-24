@@ -270,3 +270,53 @@ func TestWriteReadFile(t *testing.T) {
 
 	defer os.Remove(tmp)
 }
+
+// Creates config file and tries reading existing/nonexisting values
+func TestMaybeFuncs(t *testing.T) {
+	file, err := os.Create(tmp)
+	if err != nil {
+		t.Fatal("Test cannot run because cannot write temporary file: " + tmp)
+	}
+
+	buf := bufio.NewWriter(file)
+	buf.WriteString("[section]\n")
+	buf.WriteString("  stringOption=string \n")
+	buf.WriteString("  intOption=42 \n")
+	buf.WriteString("  floatOption=42.42 \n")
+	buf.WriteString("  boolOption=true \n")
+	buf.Flush()
+	file.Close()
+
+	c, err := ReadDefault(tmp)
+	if err != nil {
+		t.Fatalf("ReadDefault failure: %s", err)
+	}
+
+	// Check successful reads
+	if r := c.MaybeString("section", "stringOption", "nope"); r != "string" {
+		t.Errorf("Expected \"string\". Got \"%s\"", r)
+	}
+	if r := c.MaybeInt("section", "intOption", 0); r != 42 {
+		t.Errorf("Expected \"42\". Got \"%d\"", r)
+	}
+	if r := c.MaybeFloat("section", "floatOption", 0.00); r != 42.42 {
+		t.Errorf("Expected \"42.42\". Got \"%s\"", r)
+	}
+	if r := c.MaybeBool("section", "boolOption", false); r != true {
+		t.Errorf("Expected \"true\". Got \"%s\"", r)
+	}
+
+	// Check defaults
+	if r := c.MaybeString("section", "BADstringOption", "default"); r != "default" {
+		t.Errorf("Expected \"default\". Got \"%s\"", r)
+	}
+	if r := c.MaybeInt("section", "BADintOption", 43); r != 43 {
+		t.Errorf("Expected \"43\". Got \"%d\"", r)
+	}
+	if r := c.MaybeFloat("section", "BADfloatOption", 42.43); r != 42.43 {
+		t.Errorf("Expected \"42.43\". Got \"%s\"", r)
+	}
+	if r := c.MaybeBool("section", "BADboolOption", false); r != false {
+		t.Errorf("Expected \"false\". Got \"%s\"", r)
+	}
+}

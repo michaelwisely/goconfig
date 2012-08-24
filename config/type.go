@@ -116,3 +116,47 @@ func (self *Config) String(section string, option string) (value string, err err
 
 	return value, nil
 }
+
+// MaybeBool attempts to read a bool from a the specified section
+// and option, but returns the default_bool value instead of an
+// error if the section or option is missing
+func (self *Config) MaybeBool(section, option string, default_bool bool) bool {
+	value, err := self.Bool(section, option)
+	if err != nil {
+		return default_bool
+	}
+	return value
+}
+
+// MaybeInt attempts to read a int from a the specified section
+// and option, but returns the default_int value instead of an
+// error if the section or option is missing
+func (self *Config) MaybeInt(section, option string, default_int int) int {
+	value, err := self.Int(section, option)
+	if err != nil {
+		return default_int
+	}
+	return value
+}
+
+// MaybeFloat attempts to read a float from a the specified section
+// and option, but returns the default_float value instead of an
+// error if the section or option is missing
+func (self *Config) MaybeFloat(section, option string, default_float float64) float64 {
+	value, err := self.Float(section, option)
+	if err != nil {
+		return default_float
+	}
+	return value
+}
+
+// MaybeString attempts to read a string from a the specified section
+// and option, but returns the default_string value instead of an
+// error if the section or option is missing
+func (self *Config) MaybeString(section, option, default_string string) string {
+	value, err := self.String(section, option)
+	if err != nil {
+		return default_string
+	}
+	return value
+}
